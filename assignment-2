@@ -1,0 +1,135 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <stdexcept>
+
+using namespace std;
+
+class Person {
+protected:
+    string name;
+    int age;
+    string id;
+    string contact;
+
+public:
+    Person(string name, int age, string id, string contact)
+        : name(name), age(age), id(id), contact(contact) {}
+
+    virtual ~Person() {}
+
+    void setAge(int age) { 
+        if (age <= 0) throw invalid_argument("Age must be positive");
+        this->age = age;
+    }
+
+    void setName(string name) { 
+        if (name.empty()) throw invalid_argument("Name cannot be empty");
+        this->name = name; 
+    }
+
+    virtual void displayDetails() const {
+        cout << "Name: " << name << ", Age: " << age << ", ID: " << id << ", Contact: " << contact << endl;
+    }
+
+    virtual double calculatePayment() const { return 0; }
+};
+
+class Student : public Person {
+private:
+    double gpa;
+
+public:
+    Student(string name, int age, string id, string contact, double gpa)
+        : Person(name, age, id, contact), gpa(gpa) {}
+
+    void setGpa(double gpa) {
+        if (gpa < 0.0 || gpa > 4.0) throw invalid_argument("GPA must be between 0.0 and 4.0");
+        this->gpa = gpa;
+    }
+
+    void displayDetails() const override {
+        Person::displayDetails();
+        cout << "GPA: " << gpa << endl;
+    }
+
+    double calculatePayment() const override {
+        return 1500.0;
+    }
+};
+
+class Professor : public Person {
+private:
+    string department;
+
+public:
+    Professor(string name, int age, string id, string contact, string department)
+        : Person(name, age, id, contact), department(department) {}
+
+    void setDepartment(string department) { this->department = department; }
+
+    void displayDetails() const override {
+        Person::displayDetails();
+        cout << "Department: " << department << endl;
+    }
+
+    double calculatePayment() const override {
+        return 4000.0;
+    }
+};
+
+class Course {
+private:
+    string code;
+    string title;
+    int credits;
+
+public:
+    Course(string code, string title, int credits)
+        : code(code), title(title), credits(credits) {}
+
+    void displayDetails() const {
+        cout << "Course Code: " << code << ", Title: " << title << ", Credits: " << credits << endl;
+    }
+};
+
+class EnrollmentManager {
+private:
+    vector<pair<string, string>> enrollments;
+
+public:
+    void enrollStudent(string studentId, string courseCode) {
+        enrollments.push_back({studentId, courseCode});
+    }
+
+    void displayEnrollments() const {
+        for (const auto& enrollment : enrollments) {
+            cout << "Student ID: " << enrollment.first << " enrolled in Course: " << enrollment.second << endl;
+        }
+    }
+};
+
+void showDetailsAndPayment(const vector<Person*>& people) {
+    for (const auto& person : people) {
+        person->displayDetails();
+        cout << "Payment: " << person->calculatePayment() << endl << endl;
+    }
+}
+
+int main() {
+    Student student1("Alice", 20, "S123", "123-4567", 3.9);
+    Professor professor1("Dr. Smith", 45, "P123", "987-6543", "Computer Science");
+
+    vector<Person*> people = {&student1, &professor1};
+
+    showDetailsAndPayment(people);
+
+    Course course1("CS101", "Intro to Programming", 3);
+    EnrollmentManager enrollManager;
+    enrollManager.enrollStudent("S123", "CS101");
+
+    course1.displayDetails();
+    enrollManager.displayEnrollments();
+
+    return 0;
+}
